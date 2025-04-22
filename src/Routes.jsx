@@ -1,6 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
 import Home from "./pages/Home/Home";
+import NotesApp from "./pages/NotesApp/NotesApp";
 import SignUp from "./pages/SignUP/SignUp";
+import SignIn from "./pages/SignIn/SignIn";
+import ResetPassword from "./pages/ResetPassword/ResetPassword";
 
 // const [transactions, setTransactions] = useState([]);
 
@@ -15,7 +18,19 @@ const router = createBrowserRouter([
   },
   {
     path: "/signup",
-    element: <SignUp/>,
+    element: <SignUp/>, 
+  },
+  {
+    path: "/signin",
+    element: <SignIn/>, 
+  },
+  {
+    path: "/resetpassword",
+    element: <ResetPassword/>,
+  },
+  {
+    path: "/notes",
+    element: <NotesApp />,
   },
 
   // ],
