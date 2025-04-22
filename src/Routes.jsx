@@ -5,6 +5,7 @@ import CreateNote from "./pages/CreateNote/CreateNote";
 import SignUp from "./pages/SignUP/SignUp";
 import SignIn from "./pages/SignIn/SignIn";
 import ResetPassword from "./pages/ResetPassword/ResetPassword";
+import EditNote from "./pages/EditNote/EditNote";
 
 // const [transactions, setTransactions] = useState([]);
 // const [transactions, setTransactions] = useState([]);
@@ -20,15 +21,15 @@ const router = createBrowserRouter([
   },
   {
     path: "/signup",
-    element: <SignUp/>, 
+    element: <SignUp />,
   },
   {
     path: "/signin",
-    element: <SignIn/>, 
+    element: <SignIn />,
   },
   {
     path: "/resetpassword",
-    element: <ResetPassword/>,
+    element: <ResetPassword />,
   },
   {
     path: "/notes",
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
   {
     path: "/create-note",
     element: <CreateNote />,
+  },
+  {
+    path: "/edit-note/:noteId",
+    element: <EditNote />,
   },
 
   // ],

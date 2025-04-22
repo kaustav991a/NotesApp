@@ -84,11 +84,40 @@ function NotesApp() {
   }, []);
 
   if (loading) {
-    return <p className="loading-message">Loading notes...</p>;
+    return (
+      <div className={`notes-list-container ${layout}`}>
+        <header className="notes-list-header">
+          <h1>Your Notes</h1>
+          <div className="changelayout">
+            <button className="layout-toggle-btn skeleton" disabled>
+              <FaList />
+            </button>
+            <button className="layout-toggle-btn skeleton" disabled>
+              <FaTh />
+            </button>
+            <div className="btn skeleton">Create New Note</div>
+          </div>
+        </header>
+        <ul style={{ opacity: 0.1 }} className={`notes-list ${layout}`}>
+          {Array.from({ length: 3 }).map((_, index) => (
+            <li key={index} className="note-item skeleton-item">
+              <div className="note-link">
+                <h3 className="skeleton skeleton-title"></h3>
+                <p className="skeleton skeleton-content"></p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
   }
 
   if (error) {
-    return <p className="error-message">Error: {error}</p>;
+    return (
+      <div className={`fullpage notes-list-container ${layout}`}>
+        <p className="error-message">Error: {error}</p>;
+      </div>
+    );
   }
 
   return (

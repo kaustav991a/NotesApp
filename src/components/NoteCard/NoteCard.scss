@@ -35,22 +35,45 @@ $transition-normal: all 0.3s ease-in-out;
     margin-bottom: $spacing-md;
     box-shadow: 0 4px 8px $shadow-color;
     transition: all 0.3s ease-in-out;
-
+    position: relative;
+    overflow: hidden;
     &:hover {
         // transform: translateY(-4px);
         transform: scale(0.99);
         box-shadow: 0 6px 12px lighten($shadow-color, 10%);
+        .delete-button {
+            opacity: 1;
+        }
     }
-
+    .delete-button {
+        background-color: red;
+        color: white;
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        border: none;
+        width: 60px;
+        // height: 40px;
+        opacity: 0;
+        transition: all 0.3s ease-in-out;
+        // border-radius: 50%;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
     .note-link {
         display: block;
         padding: $spacing-md;
         text-decoration: none;
         color: $text-color-primary;
+        word-wrap: break-word;
+        position: relative;
 
         h3 {
             margin-top: 0;
-            margin-bottom: $spacing-sm / 2;
+            margin-bottom: 5px;
             font-size: $font-size-h3;
             font-weight: $heading-font-weight;
             color: $primary-blue;

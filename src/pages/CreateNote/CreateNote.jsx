@@ -1,15 +1,18 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./CreateNote.scss";
 import { db } from "../../firebase/index"; // Adjust path as needed
 import { collection, addDoc } from "firebase/firestore";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 function CreateNote() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
-  const [saveError, setSaveError] = useState(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationType, setNotificationType] = useState("");
 
   // TEMPORARY USER ID FOR TESTING - REPLACE WITH AUTHENTICATION LATER
   const tempUserId = "test-user-id-123";
@@ -22,14 +25,29 @@ function CreateNote() {
     setContent(event.target.value);
   };
 
+  const showCustomNotification = (message, type) => {
+    setNotificationMessage(message);
+    setNotificationType(type);
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 2000);
+  };
+
   const handleSaveNote = async () => {
+    if (!title.trim() && !content.trim()) {
+      showCustomNotification(
+        "Note cannot be empty. Please enter a title or content.",
+        "error"
+      );
+      return;
+    }
+
     setIsSaving(true);
-    setSaveError(null);
+    setShowNotification(false); // Reset notification
 
     try {
       if (!tempUserId) {
         console.error("Temporary user ID not set.");
-        setSaveError("Temporary user ID not set.");
+        showCustomNotification("Temporary user ID not set.", "error");
         setIsSaving(false);
         return;
       }
@@ -50,7 +68,7 @@ function CreateNote() {
       navigate("/notes");
     } catch (error) {
       console.error("Error saving note:", error);
-      setSaveError("Failed to save note. Please try again.");
+      showCustomNotification("Failed to save note. Please try again.", "error");
       setIsSaving(false);
     }
   };
@@ -62,7 +80,12 @@ function CreateNote() {
   return (
     <div className="create-note-container">
       <header className="create-note-header">
-        <h1>Create New Note</h1>
+        <h1>
+          <Link to="/notes">
+            <IoMdArrowRoundBack />
+          </Link>
+          Create New Note
+        </h1>
       </header>
       <div className="create-note-form">
         <div className="form-group">
@@ -88,13 +111,17 @@ function CreateNote() {
           />
         </div>
 
-        {saveError && <p className="error-message">{saveError}</p>}
+        {showNotification && (
+          <div className={`notification ${notificationType}`}>
+            {notificationMessage}
+          </div>
+        )}
 
         <div className="form-actions">
           <button
             className="btn btn-primary"
             onClick={handleSaveNote}
-            disabled={isSaving}
+            disabled={isSaving || (!title.trim() && !content.trim())}
           >
             {isSaving ? "Saving..." : "Save"}
           </button>

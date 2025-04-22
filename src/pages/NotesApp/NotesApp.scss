@@ -34,6 +34,11 @@ $transition-normal: all 0.3s ease-in-out;
     color: $text-color-primary;
     // font-family: $main-font;
     overflow: hidden;
+    &.fullpage {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 }
 
 .notes-list-header {
@@ -70,6 +75,32 @@ $transition-normal: all 0.3s ease-in-out;
             &.active {
                 color: $accent-color;
             }
+        }
+
+        .layout-toggle-btn.skeleton,
+        .btn.skeleton {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: transparent;
+            border-radius: $border-radius;
+            cursor: not-allowed;
+            animation: pulse 1.5s infinite ease-in-out;
+            overflow: hidden;
+
+            &::before {
+                content: "\00a0";
+            }
+        }
+
+        .layout-toggle-btn.skeleton {
+            width: 30px;
+            height: 30px;
+            margin-right: $spacing-sm;
+        }
+
+        .btn.skeleton {
+            padding: $spacing-sm $spacing-md;
+            width: 150px;
+            text-align: center;
         }
     }
     .btn {
