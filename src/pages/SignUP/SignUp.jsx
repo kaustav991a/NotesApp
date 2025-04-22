@@ -45,15 +45,15 @@ function SignUp() {
                                         <input type="password" placeholder='Confirm Password' />
                                     </div>
                                     <div className="form-check mb-3">
-                                        <input type="checkbox" class="form-check-input" id="validationFormCheck1"
+                                        <input type="checkbox" className="form-check-input" id="validationFormCheck1"
                                         />
-                                        <label class="form-check-label" for="validationFormCheck1">I accept the <a href="#">Terms and Conditions</a></label>
+                                        <label className="form-check-label" for="validationFormCheck1">I accept the <a href="#">Terms and Conditions</a></label>
                                     </div>
                                     <div className="inpt-wrp submit">
                                         <input type="submit" value='Register' />
                                     </div>
                                     <div className="inpt-wrp">
-                                        <h6>Already a user? <Link to="auth/signin">just sign in here!</Link></h6>
+                                        <h6>Already a user? <Link to="/signin">just sign in here!</Link></h6>
                                     </div>
                                 </form>
                             </div>

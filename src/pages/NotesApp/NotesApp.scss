@@ -114,6 +114,9 @@ $transition-normal: all 0.3s ease-in-out;
         padding-right: 0;
         align-items: start; /* Prevent vertical stretching of grid items */
         align-content: flex-start;
+        .note-item {
+            height: 100%;
+        }
     }
 
     .note-item {
@@ -124,10 +127,9 @@ $transition-normal: all 0.3s ease-in-out;
         transition:
             transform 0.2s ease-in-out,
             box-shadow 0.2s ease-in-out;
-        height: 100%;
 
         &:hover {
-            transform: translateY(-4px);
+            transform: scale(0.99);
             box-shadow: 0 6px 12px lighten($shadow-color, 10%);
         }
 
