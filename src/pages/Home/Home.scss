@@ -1,0 +1,45 @@
+.splash-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: rgb(19, 24, 46); /* A light, calming background */
+    color: #fff; /* Darker text for better readability */
+    font-family: sans-serif;
+}
+
+.splash-logo {
+    width: 250px;
+    height: auto;
+    margin-bottom: 20px;
+    box-shadow: 0 0 55px 35px rgba(55, 66, 116, 0.3);
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.splash-logo img {
+    max-width: 100%;
+    height: auto;
+}
+
+.splash-description {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 0 20px; /* Add some horizontal padding */
+    font-size: 28px;
+    line-height: 1.5;
+    font-weight: 600;
+}
+
+
+
+.splash-button:hover {
+    background-color: rgb(65, 73, 172);
+}
+
+.splash-loading {
+    font-size: 0.9em;
+    color: #777;
+    margin-top: 20px;
+}
