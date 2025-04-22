@@ -30,16 +30,16 @@ function SignUp() {
                                 <h3 className='title-border'>Sign Up Your Account</h3>
                                 <form className='form-sec'>
                                         <div className="inpt-wrp">
-                                        <input type="text" placeholder='Full Name' value={user.name} onChange={(e)=>{setUser(e.target.value)}}/>
+                                        <input type="text" placeholder='Full Name' value={user.name} onChange={(e)=>{setUser({...user , name : e.target.value})}}/>
                                     </div>
                                     <div className="inpt-wrp">
-                                        <input type="email" placeholder='Email' />
+                                        <input type="email" placeholder='Email' value={user.email} onChange={(e)=>{setUser({...user, email:e.target.value})}} />
                                     </div>
                                     <div className="inpt-wrp">
-                                        <input type="text" placeholder='Username' />
+                                        <input type="text" placeholder='Username' value={user.username} onChange={(e)=>{setUser({...user , username : e.target.value})}} />
                                     </div>
                                     <div className="inpt-wrp">
-                                        <input type="password" placeholder='Password' />
+                                        <input type="password" placeholder='Password' value={user.password}  onChange={(e)=>{setUser({...user , password : e.target.value})}}/>
                                     </div>
                                     <div className="inpt-wrp">
                                         <input type="password" placeholder='Confirm Password' />
