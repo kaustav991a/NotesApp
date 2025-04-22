@@ -1,10 +1,12 @@
 import { createBrowserRouter } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import NotesApp from "./pages/NotesApp/NotesApp";
+import CreateNote from "./pages/CreateNote/CreateNote";
 import SignUp from "./pages/SignUP/SignUp";
 import SignIn from "./pages/SignIn/SignIn";
 import ResetPassword from "./pages/ResetPassword/ResetPassword";
 
+// const [transactions, setTransactions] = useState([]);
 // const [transactions, setTransactions] = useState([]);
 
 const router = createBrowserRouter([
@@ -31,6 +33,10 @@ const router = createBrowserRouter([
   {
     path: "/notes",
     element: <NotesApp />,
+  },
+  {
+    path: "/create-note",
+    element: <CreateNote />,
   },
 
   // ],

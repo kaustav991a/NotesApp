@@ -1,0 +1,114 @@
+// CreateNote.scss
+
+$primary-color: #2c3e50; // Dark, professional blue
+$accent-color: #00bcd4; // Vibrant cyan for calls to action
+$text-color-primary: #ecf0f1; // Light text on dark backgrounds
+$text-color-secondary: #bdc3c7; // Softer text color
+$background-dark: #222; // Dark background for the app
+$background-input: #333; // Darker background for inputs
+$border-color: #444; // Dark border color
+$border-radius: 8px;
+$spacing-sm: 10px;
+$spacing-md: 15px;
+$font-size-base: 16px;
+$transition-normal: all 0.3s ease-in-out;
+$box-shadow-light: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+.create-note-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: $background-dark;
+    color: $text-color-primary;
+    padding: $spacing-md;
+    font-family: poppins;
+    // font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.create-note-header {
+    padding-bottom: $spacing-md;
+    margin-bottom: $spacing-md;
+    border-bottom: 1px solid $border-color;
+
+    h1 {
+        font-size: 2em;
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+}
+
+.create-note-form {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    flex-grow: 1; /* Take up remaining space */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+
+    label {
+        font-size: 1em;
+        margin-bottom: $spacing-sm / 2;
+        color: $text-color-secondary;
+    }
+
+    .form-control {
+        padding: $spacing-sm;
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        background-color: $background-input;
+        color: $text-color-primary;
+        font-size: 1em;
+        transition: $transition-normal;
+        font-family: Poppins;
+
+        &:focus {
+            outline: none;
+            border-color: $accent-color;
+            box-shadow: 0 0 0 0.2rem rgba($accent-color, 0.25);
+        }
+    }
+
+    textarea.form-control {
+        resize: vertical; /* Allow vertical resizing */
+        min-height: 150px;
+        font-family: Poppins;
+    }
+}
+
+.form-actions {
+    display: flex;
+    gap: $spacing-sm;
+    margin-top: $spacing-md;
+    justify-content: flex-end; /* Align buttons to the right */
+
+    .btn {
+        padding: $spacing-sm $spacing-md;
+        border: none;
+        border-radius: $border-radius;
+        font-size: 1em;
+        cursor: pointer;
+        transition: $transition-normal;
+        box-shadow: $box-shadow-light;
+
+        &.btn-primary {
+            background-color: $accent-color;
+            color: $text-color-primary;
+
+            &:hover {
+                background-color: darken($accent-color, 10%);
+            }
+        }
+
+        &.btn-secondary {
+            background-color: $primary-color;
+            color: $text-color-primary;
+
+            &:hover {
+                background-color: darken($primary-color, 10%);
+            }
+        }
+    }
+}
