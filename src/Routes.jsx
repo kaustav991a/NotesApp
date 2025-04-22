@@ -1,10 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import Home from "./pages/Home/Home";
-<<<<<<< HEAD
-import SignUp from "./pages/SignUP/SignUp";
-=======
 import NotesApp from "./pages/NotesApp/NotesApp";
->>>>>>> master
+import SignUp from "./pages/SignUP/SignUp";
 
 // const [transactions, setTransactions] = useState([]);
 
@@ -18,13 +15,12 @@ const router = createBrowserRouter([
     element: <Home />,
   },
   {
-<<<<<<< HEAD
     path: "/signup",
-    element: <SignUp/>,
-=======
+    element: <SignUp/>, 
+  },
+  {
     path: "/notes",
     element: <NotesApp />,
->>>>>>> master
   },
 
   // ],
