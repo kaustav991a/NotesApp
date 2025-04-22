@@ -1,8 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import NotesApp from "./pages/NotesApp/NotesApp";
-
-// const [transactions, setTransactions] = useState([]);
+import CreateNote from "./pages/CreateNote/CreateNote";
 
 const router = createBrowserRouter([
   // {
@@ -16,6 +15,10 @@ const router = createBrowserRouter([
   {
     path: "/notes",
     element: <NotesApp />,
+  },
+  {
+    path: "/create-note",
+    element: <CreateNote />,
   },
 
   // ],
