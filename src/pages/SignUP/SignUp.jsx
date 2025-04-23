@@ -2,20 +2,46 @@ import React, { useState } from 'react'
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from '../../firebase';
 import "./SignUp.scss"
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { FaArrowLeft } from "react-icons/fa6";
+import { doc, setDoc } from 'firebase/firestore';
 function SignUp() {
-      
-    const [user , setUser] = useState({
-         name: "",
-         email: "",
-         username : "",
-         password : "",
-         consfirmPassowrd: "",
-         isAccepted : false
+const navigate = useNavigate();
+    const [user, setUser] = useState({
+        name: "",
+        email: "",
+        username: "",
+        password: "",
+        confirmPassword: "",
+        acceptedTerms: false
 
     })
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await createUserWithEmailAndPassword(auth, user.email, user.password);
+            const uid = res.user.uid;
+            await setDoc(doc(db, "users", uid),
+                {
+                    name: user.name,
+                    email: user.email,
+                    username: user.username,
+                    acceptedTerms: user.acceptedTerms,
+                    createdAt: new Date(),
+                }
+            )
+             console.log("data added succesfully");
+            console.log(res.user.email);
+            
+            navigate('/notes');
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
         <>
@@ -28,26 +54,29 @@ function SignUp() {
                             <div className="auth-wrap">
                                 <Link to="/" className="nextBackBtn"> <FaArrowLeft /></Link>
                                 <h3 className='title-border'>Sign Up Your Account</h3>
-                                <form className='form-sec'>
-                                        <div className="inpt-wrp">
-                                        <input type="text" placeholder='Full Name' value={user.name} onChange={(e)=>{setUser({...user , name : e.target.value})}}/>
+                                <form className='form-sec' onSubmit={handleSubmit} >
+
+                                    <div className="inpt-wrp">
+                                        <input type="text" placeholder='Full Name' value={user.name} onChange={(e) => { setUser({ ...user, name: e.target.value }) }} />
                                     </div>
                                     <div className="inpt-wrp">
-                                        <input type="email" placeholder='Email' value={user.email} onChange={(e)=>{setUser({...user, email:e.target.value})}} />
+                                        <input type="email" placeholder='Email' value={user.email} onChange={(e) => { setUser({ ...user, email: e.target.value }) }} />
                                     </div>
                                     <div className="inpt-wrp">
-                                        <input type="text" placeholder='Username' value={user.username} onChange={(e)=>{setUser({...user , username : e.target.value})}} />
+                                        <input type="text" placeholder='Username' value={user.username} onChange={(e) => { setUser({ ...user, username: e.target.value }) }} />
                                     </div>
                                     <div className="inpt-wrp">
-                                        <input type="password" placeholder='Password' value={user.password}  onChange={(e)=>{setUser({...user , password : e.target.value})}}/>
+                                        <input type="password" placeholder='Password' value={user.password} onChange={(e) => { setUser({ ...user, password: e.target.value }) }} />
                                     </div>
                                     <div className="inpt-wrp">
-                                        <input type="password" placeholder='Confirm Password' />
+                                        <input type="password" placeholder='Confirm Password' value={user.confirmPassword} onChange={(e) => { setUser({ ...user, confirmPassword: e.target.value }) }} />
                                     </div>
-                                    <div className="form-check mb-3">
-                                        <input type="checkbox" className="form-check-input" id="validationFormCheck1"
-                                        />
-                                        <label className="form-check-label" for="validationFormCheck1">I accept the <a href="#">Terms and Conditions</a></label>
+                                    <div class="form-check mb-3">
+                                        <input type="checkbox" class="form-check-input" id="validationFormCheck1" checked={user.acceptedTerms}
+                                            onChange={(e) =>
+                                                setUser({ ...user, acceptedTerms: e.target.checked })
+                                            } />
+                                        <label class="form-check-label" for="validationFormCheck1">I accept the <a href="#">Terms and Conditions</a></label>
                                     </div>
                                     <div className="inpt-wrp submit">
                                         <input type="submit" value='Register' />
@@ -58,7 +87,7 @@ function SignUp() {
                                 </form>
                             </div>
                         </Col>
-                       
+
                     </Row>
 
                 </Container>
