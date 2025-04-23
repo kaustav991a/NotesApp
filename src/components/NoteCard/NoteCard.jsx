@@ -1,26 +1,37 @@
-// NoteCard.jsx
 import React from "react";
 import { Link } from "react-router-dom";
-import "./NoteCard.scss"; // Optional: Create a CSS/SCSS file for NoteCard
-import { RiCloseCircleFill } from "react-icons/ri"; // Import the close circle icon
+import "./NoteCard.scss";
+import { RiCloseCircleFill } from "react-icons/ri";
+import { MdModeEdit } from "react-icons/md";
 
-function NoteCard({ note, onDelete }) {
+function NoteCard({ note, onDelete, onNoteClick }) {
   const handleDelete = (event) => {
-    event.preventDefault(); // Prevent the Link from being followed
+    event.preventDefault();
     if (onDelete) {
       onDelete(note.id);
     }
   };
 
+  const handleNoteClick = () => {
+    if (onNoteClick) {
+      onNoteClick(note); // Call the function passed from NotesApp, passing the note data
+    }
+  };
+
   return (
     <li className="note-item">
-      <Link to={`/edit-note/${note.id}`} className="note-link">
+      <div className="note-link" onClick={handleNoteClick}>
+        {" "}
+        {/* Make the note content clickable */}
         <h3>{note.title}</h3>
-        <p>{note.content.substring(0, 50)}...</p>
-      </Link>
+        <p>{note.content.substring(0, 100)}...</p>
+      </div>
       <button className="delete-button" onClick={handleDelete}>
         <RiCloseCircleFill />
       </button>
+      <Link className="edit-button" to={`/edit-note/${note.id}`}>
+        <MdModeEdit />
+      </Link>
     </li>
   );
 }
