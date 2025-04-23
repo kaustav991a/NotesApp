@@ -2,11 +2,14 @@ import React, { useState } from 'react'
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from '../../firebase';
 import "./SignUp.scss"
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { FaArrowLeft } from "react-icons/fa6";
+import { doc, setDoc } from 'firebase/firestore';
 function SignUp() {
-
+const navigate = useNavigate();
     const [user, setUser] = useState({
         name: "",
         email: "",
@@ -16,6 +19,29 @@ function SignUp() {
         acceptedTerms: false
 
     })
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await createUserWithEmailAndPassword(auth, user.email, user.password);
+            const uid = res.user.uid;
+            await setDoc(doc(db, "users", uid),
+                {
+                    name: user.name,
+                    email: user.email,
+                    username: user.username,
+                    acceptedTerms: user.acceptedTerms,
+                    createdAt: new Date(),
+                }
+            )
+             console.log("data added succesfully");
+            console.log(res.user.email);
+            
+            navigate('/notes');
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
         <>
@@ -28,7 +54,8 @@ function SignUp() {
                             <div className="auth-wrap">
                                 <Link to="/" className="nextBackBtn"> <FaArrowLeft /></Link>
                                 <h3 className='title-border'>Sign Up Your Account</h3>
-                                <form className='form-sec' onSubmit={handleSubmit}>
+                                <form className='form-sec' onSubmit={handleSubmit} >
+
                                     <div className="inpt-wrp">
                                         <input type="text" placeholder='Full Name' value={user.name} onChange={(e) => { setUser({ ...user, name: e.target.value }) }} />
                                     </div>
