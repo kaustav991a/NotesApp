@@ -1,12 +1,38 @@
-import React from "react";
+import React, { useState } from "react";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import "./SignIn.scss";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase";
 import { Link } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 
 function SignIn() {
+  const navigate = useNavigate();
+
+  const [user, setUser] = useState({
+    email: "",
+    password: "",
+    acceptedTerms: false
+  })
+
+
+  const handleSignIn = async (e) =>{
+     e.preventDefault();
+     try {
+       const res = await signInWithEmailAndPassword(auth, user.email , user.password);
+       if(res){
+          navigate("/notes");
+       }
+     } catch (error) {
+         console.log(error);
+     }
+     
+
+  }
+   
   return (
     <section className="auth-sec">
       <Container>
@@ -18,12 +44,12 @@ function SignIn() {
                 <FaArrowLeft />
               </Link>
               <h3 className="title-border">Sign In To Your Account</h3>
-              <form className="form-sec">
+              <form className="form-sec" onSubmit={handleSignIn}>
                 <div className="inpt-wrp">
-                  <input type="text" placeholder="Username" />
+                  <input type="text" placeholder="Username" value={user.email} onChange={(e) => { setUser({ ...user, email: e.target.value }) }} />
                 </div>
                 <div className="inpt-wrp">
-                  <input type="password" placeholder="Password" />
+                  <input type="password" placeholder="Password" value={user.password} onChange={(e) => { setUser({ ...user, password: e.target.value }) }} />
                 </div>
                 <div className="form-check mb-3">
                   <input
@@ -31,7 +57,9 @@ function SignIn() {
                     class="form-check-input"
                     id="validationFormCheck1"
                   />
-                  <label class="form-check-label" for="validationFormCheck1">
+                  <label class="form-check-label" for="validationFormCheck1" checked={user.acceptedTerms} onChange={(e) =>
+                    setUser({ ...user, acceptedTerms: e.target.checked })
+                  }>
                     I accept the <a href="#">Terms and Conditions</a>
                   </label>
                 </div>
