@@ -1,0 +1,186 @@
+// CreateNote.scss
+
+$primary-color: #2c3e50; // Dark, professional blue
+$accent-color: #00bcd4; // Vibrant cyan for calls to action
+$text-color-primary: #ecf0f1; // Light text on dark backgrounds
+$text-color-secondary: #bdc3c7; // Softer text color
+$background-dark: #222; // Dark background for the app
+$background-input: #333; // Darker background for inputs
+$border-color: #444; // Dark border color
+$border-radius: 8px;
+$spacing-sm: 10px;
+$spacing-md: 15px;
+$font-size-base: 16px;
+$transition-normal: all 0.3s ease-in-out;
+$box-shadow-light: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+.edit-note-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: $background-dark;
+    color: $text-color-primary;
+    padding: $spacing-md;
+    font-family: poppins;
+    // font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.edit-note-header {
+    padding-bottom: $spacing-md;
+    margin-bottom: $spacing-md;
+    border-bottom: 1px solid $border-color;
+
+    h1 {
+        font-size: 2em;
+        font-weight: 600;
+        margin-bottom: 0;
+        font-family: poppins;
+        a {
+            color: white;
+            display: inline-block;
+            position: relative;
+            top: 5px;
+            margin-right: 20px;
+        }
+    }
+}
+
+.edit-note-form {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    flex-grow: 1; /* Take up remaining space */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+
+    label {
+        font-size: 1em;
+        margin-bottom: $spacing-sm / 2;
+        color: $text-color-secondary;
+    }
+
+    .form-control {
+        padding: $spacing-sm;
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        background-color: $background-input;
+        color: $text-color-primary;
+        font-size: 1em;
+        transition: $transition-normal;
+        font-family: Poppins;
+
+        &:focus {
+            outline: none;
+            border-color: $accent-color;
+            box-shadow: 0 0 0 0.2rem rgba($accent-color, 0.25);
+        }
+    }
+
+    textarea.form-control {
+        resize: vertical; /* Allow vertical resizing */
+        min-height: 150px;
+        font-family: Poppins;
+    }
+}
+
+.form-actions {
+    display: flex;
+    gap: $spacing-sm;
+    margin-top: $spacing-md;
+    justify-content: flex-end; /* Align buttons to the right */
+
+    .btn {
+        padding: $spacing-sm $spacing-md;
+        border: none;
+        border-radius: $border-radius;
+        font-size: 1em;
+        cursor: pointer;
+        transition: $transition-normal;
+        box-shadow: $box-shadow-light;
+
+        &.btn-primary {
+            background-color: $accent-color;
+            color: $text-color-primary;
+
+            &:hover {
+                background-color: darken($accent-color, 10%);
+            }
+        }
+
+        &.btn-secondary {
+            background-color: $primary-color;
+            color: $text-color-primary;
+
+            &:hover {
+                background-color: darken($primary-color, 10%);
+            }
+        }
+    }
+}
+
+.notification {
+    position: fixed; /* Or absolute, depending on your layout */
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4caf50; /* Green background for success */
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    z-index: 1000; /* Ensure it's on top of other elements */
+    opacity: 0;
+    animation: slideInFadeOut 2s ease-out forwards;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.notification.success {
+    background-color: #4caf50;
+}
+
+@keyframes slideInFadeOut {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
+    20% {
+        opacity: 1;
+        transform: translateX(-50%, 0);
+    }
+    80% {
+        opacity: 1;
+        transform: translateX(-50%, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+    }
+}
+
+.loading-spinner-centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Or adjust as needed */
+    padding: 20px 0; /* Add some spacing around the spinner */
+}
+
+.loading-spinner-circular {
+    border: 4px solid rgba(0, 0, 0, 0.1); /* Light gray border */
+    border-top: 4px solid $primary-color; /* Make sure you have this variable defined or replace with a color */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

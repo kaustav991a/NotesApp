@@ -55,7 +55,7 @@ function SignUp() {
                                         <input type="submit" value='Register' />
                                     </div>
                                     <div className="inpt-wrp">
-                                        <h6>Already a user? <Link to="auth/signin">just sign in here!</Link></h6>
+                                        <h6>Already a user? <Link to="/signin">just sign in here!</Link></h6>
                                     </div>
                                 </form>
                             </div>

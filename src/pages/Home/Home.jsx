@@ -16,7 +16,7 @@ function Home() {
           notes anytime, anywhere.
         </p>
       </div>
-      <Link className="btn" to="/notes">
+      <Link className="btn" to="/signup">
         Get Started
       </Link>
     </div>

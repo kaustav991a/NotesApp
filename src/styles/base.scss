@@ -73,7 +73,7 @@ button {
         margin-bottom: 20px;
     }
     input {
-        &:not([type=submit]):not([type=checkbox]) {
+        &:not([type="submit"]):not([type="checkbox"]) {
             width: 100%;
             border: none;
             border-radius: 0;
@@ -88,7 +88,7 @@ button {
                 outline: none;
             }
         }
-        &[type=submit] {
+        &[type="submit"] {
             padding: 0.5rem 2rem;
             background: #000;
             margin-top: 1.3rem;
@@ -97,7 +97,7 @@ button {
             font-family: "Poppins", sans-serif;
             cursor: pointer;
         }
-        &[type=checkbox] {
+        &[type="checkbox"] {
             cursor: pointer;
         }
     }
