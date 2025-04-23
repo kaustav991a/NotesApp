@@ -1,14 +1,15 @@
 import { RouterProvider } from "react-router-dom";
-import { UserProvider } from "./Context/UserContext"; // Import UserProvider
+import { AuthProvider } from "./Context/UserContext"; // Import UserProvider
+import { useAuth } from "./Context/UserContext"; // If your folder is named "Context"
 
 import "./styles/base.scss";
 import router from "./Routes";
 
 function App() {
   return (
-    <UserProvider>
+    <AuthProvider>
       <RouterProvider router={router} />
-    </UserProvider>
+    </AuthProvider>
   );
 }
 

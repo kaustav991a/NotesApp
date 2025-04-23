@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "./NotesApp.scss";
 import NoteCard from "../../components/NoteCard/NoteCard";
 import { FaList, FaTh } from "react-icons/fa";
-import { db } from "../../firebase/index"; // Import Firebase
+import { db, auth } from "../../firebase/index"; // Import Firebase
 import {
   collection,
   onSnapshot,
@@ -12,25 +12,22 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
+import { useAuth } from "../../Context/UserContext"; // Correct import path
 
 function NotesApp() {
   const [layout, setLayout] = useState("list");
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentUser, setCurrentUser] = useState("user1"); // Default to user1
+  const { currentUser } = useAuth(); // Get currentUser from AuthContext
 
   const toggleLayout = (newLayout) => {
     setLayout(newLayout);
   };
 
-  const switchUser = (user) => {
-    setCurrentUser(user);
-  };
-
   // TEMPORARY USER IDs FOR TESTING
-  const tempUser1Id = "test-user-id-123";
-  const tempUser2Id = "another-test-user-456";
+  // const tempUser1Id = "test-user-id-123";
+  // const tempUser2Id = "another-test-user-456";
 
   const getCurrentUserId = () => {
     return currentUser === "user1" ? tempUser1Id : tempUser2Id;
@@ -40,20 +37,19 @@ function NotesApp() {
     const fetchNotes = async () => {
       setLoading(true);
       setError(null);
-      const currentUserId = getCurrentUserId();
 
       try {
-        if (!currentUserId) {
-          console.error("Current user ID not set.");
-          setError("Current user ID not set.");
+        if (!currentUser) {
+          console.log("No user logged in.");
+          setNotes([]);
           setLoading(false);
           return;
         }
 
         const notesCollectionRef = collection(
           db,
-          `users/${currentUserId}/notes`
-        );
+          `users/${currentUser.uid}/notes`
+        ); // Use currentUser.uid
         const q = query(notesCollectionRef, orderBy("createdAt", "desc"));
 
         const unsubscribe = onSnapshot(
@@ -82,23 +78,22 @@ function NotesApp() {
     };
 
     fetchNotes();
-  }, [currentUser]); // Re-fetch notes when the currentUser changes
+  }, [currentUser]); // Re-fetch when currentUser changes
 
   const handleDeleteNote = async (noteId) => {
-    const currentUserId = getCurrentUserId();
-    try {
-      if (!currentUserId) {
-        setError("User ID is not available.");
-        return;
-      }
+    if (!currentUser?.uid) {
+      setError("No user logged in.");
+      return;
+    }
 
-      const noteDocRef = doc(db, `users/${currentUserId}/notes`, noteId);
+    try {
+      const noteDocRef = doc(db, `users/${currentUser.uid}/notes`, noteId);
       await deleteDoc(noteDocRef);
 
       setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
 
       console.log(
-        `Note with ID ${noteId} deleted successfully for user ${currentUserId}.`
+        `Note with ID ${noteId} deleted successfully for user ${currentUser.uid}.`
       );
     } catch (err) {
       setError("Failed to delete note. Please try again.");
@@ -149,14 +144,14 @@ function NotesApp() {
         <header className="notes-list-header">
           <h1>Your Notes</h1>
           <div className="changelayout">
-            <div className="changeuserbtn">
+            {/* <div className="changeuserbtn">
               <button className="btn" onClick={() => switchUser("user1")}>
                 Switch to User 1
               </button>
               <button className="btn" onClick={() => switchUser("user2")}>
                 Switch to User 2
               </button>
-            </div>
+            </div> */}
             <button
               className={`layout-toggle-btn ${
                 layout === "list" ? "active" : ""
@@ -178,6 +173,10 @@ function NotesApp() {
             <Link to="/create-note" className="btn">
               Create New Note
             </Link>
+
+            <div className="profileimg">
+              <img src="" alt="" />
+            </div>
           </div>
         </header>
 

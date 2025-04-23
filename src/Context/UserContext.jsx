@@ -1,19 +1,31 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
+import { auth } from "../firebase/index"; // Import your Firebase auth instance
 
-const UserContext = createContext();
+const AuthContext = createContext();
 
-export const UserProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState("user1"); // Manage user state here
+export const AuthProvider = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleUserSwitch = (user) => {
-    setCurrentUser(user);
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
+
+    return unsubscribe; // Cleanup function to unsubscribe on unmount
+  }, []);
+
+  const value = {
+    currentUser,
+    loading,
   };
 
   return (
-    <UserContext.Provider value={{ currentUser, handleUserSwitch }}>
-      {children}
-    </UserContext.Provider>
+    <AuthContext.Provider value={value}>
+      {!loading && children} {/* Only render children when not loading */}
+    </AuthContext.Provider>
   );
 };
 
-export const useUser = () => useContext(UserContext);
+export const useAuth = () => useContext(AuthContext);

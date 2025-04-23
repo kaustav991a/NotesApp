@@ -4,6 +4,7 @@ import "./CreateNote.scss";
 import { db } from "../../firebase/index"; // Adjust path as needed
 import { collection, addDoc } from "firebase/firestore";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { useAuth } from "../../Context/UserContext"; // Import useAuth hook
 
 function CreateNote() {
   const [title, setTitle] = useState("");
@@ -13,9 +14,7 @@ function CreateNote() {
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
   const [notificationType, setNotificationType] = useState("");
-
-  // TEMPORARY USER ID FOR TESTING - REPLACE WITH AUTHENTICATION LATER
-  const tempUserId = "test-user-id-123";
+  const { currentUser } = useAuth(); // Get currentUser from AuthContext
 
   const handleTitleChange = (event) => {
     setTitle(event.target.value);
@@ -45,14 +44,17 @@ function CreateNote() {
     setShowNotification(false); // Reset notification
 
     try {
-      if (!tempUserId) {
-        console.error("Temporary user ID not set.");
-        showCustomNotification("Temporary user ID not set.", "error");
+      if (!currentUser?.uid) {
+        console.error("User not authenticated.");
+        showCustomNotification("User not authenticated.", "error");
         setIsSaving(false);
         return;
       }
 
-      const notesCollectionRef = collection(db, `users/${tempUserId}/notes`);
+      const notesCollectionRef = collection(
+        db,
+        `users/${currentUser.uid}/notes`
+      ); // Use currentUser.uid
       const createdAt = new Date().toISOString();
       const updatedAt = createdAt;
 
@@ -63,7 +65,7 @@ function CreateNote() {
         updatedAt: updatedAt,
       });
 
-      console.log("Note saved successfully for user:", tempUserId);
+      console.log("Note saved successfully for user:", currentUser.uid);
       setIsSaving(false);
       navigate("/notes");
     } catch (error) {
