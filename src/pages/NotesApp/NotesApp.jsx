@@ -3,13 +3,14 @@ import { Link } from "react-router-dom";
 import "./NotesApp.scss";
 import NoteCard from "../../components/NoteCard/NoteCard";
 import { FaList, FaTh } from "react-icons/fa";
-import { db, auth } from "../../firebase/index"; // Import Firebase
+import { db } from "../../firebase/index"; // Import Firebase
 import {
   collection,
-  getDocs,
   onSnapshot,
   query,
   orderBy,
+  deleteDoc,
+  doc,
 } from "firebase/firestore";
 
 function NotesApp() {
@@ -17,33 +18,44 @@ function NotesApp() {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentUser, setCurrentUser] = useState("user1"); // Default to user1
 
   const toggleLayout = (newLayout) => {
     setLayout(newLayout);
   };
 
-  // TEMPORARY USER ID FOR TESTING - REPLACE WITH AUTHENTICATION LATER
-  const tempUserId = "test-user-id-123";
+  const switchUser = (user) => {
+    setCurrentUser(user);
+  };
+
+  // TEMPORARY USER IDs FOR TESTING
+  const tempUser1Id = "test-user-id-123";
+  const tempUser2Id = "another-test-user-456";
+
+  const getCurrentUserId = () => {
+    return currentUser === "user1" ? tempUser1Id : tempUser2Id;
+  };
 
   useEffect(() => {
     const fetchNotes = async () => {
       setLoading(true);
       setError(null);
+      const currentUserId = getCurrentUserId();
 
       try {
-        if (!tempUserId) {
-          console.error("Temporary user ID not set.");
-          setError("Temporary user ID not set.");
+        if (!currentUserId) {
+          console.error("Current user ID not set.");
+          setError("Current user ID not set.");
           setLoading(false);
           return;
         }
 
-        const notesCollectionRef = collection(db, `users/${tempUserId}/notes`);
-
-        // Order the notes by createdAt in descending order
+        const notesCollectionRef = collection(
+          db,
+          `users/${currentUserId}/notes`
+        );
         const q = query(notesCollectionRef, orderBy("createdAt", "desc"));
 
-        // Use onSnapshot with the ordered query for real-time updates
         const unsubscribe = onSnapshot(
           q,
           (snapshot) => {
@@ -62,17 +74,6 @@ function NotesApp() {
         );
 
         return unsubscribe;
-
-        // If you only need to fetch once:
-        /*
-        const querySnapshot = await getDocs(q);
-        const fetchedNotes = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setNotes(fetchedNotes);
-        setLoading(false);
-        */
       } catch (err) {
         console.error("Error fetching notes:", err);
         setError("Failed to fetch notes.");
@@ -81,7 +82,29 @@ function NotesApp() {
     };
 
     fetchNotes();
-  }, []);
+  }, [currentUser]); // Re-fetch notes when the currentUser changes
+
+  const handleDeleteNote = async (noteId) => {
+    const currentUserId = getCurrentUserId();
+    try {
+      if (!currentUserId) {
+        setError("User ID is not available.");
+        return;
+      }
+
+      const noteDocRef = doc(db, `users/${currentUserId}/notes`, noteId);
+      await deleteDoc(noteDocRef);
+
+      setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
+
+      console.log(
+        `Note with ID ${noteId} deleted successfully for user ${currentUserId}.`
+      );
+    } catch (err) {
+      setError("Failed to delete note. Please try again.");
+      console.error("Error deleting note:", err);
+    }
+  };
 
   if (loading) {
     return (
@@ -126,6 +149,14 @@ function NotesApp() {
         <header className="notes-list-header">
           <h1>Your Notes</h1>
           <div className="changelayout">
+            <div className="changeuserbtn">
+              <button className="btn" onClick={() => switchUser("user1")}>
+                Switch to User 1
+              </button>
+              <button className="btn" onClick={() => switchUser("user2")}>
+                Switch to User 2
+              </button>
+            </div>
             <button
               className={`layout-toggle-btn ${
                 layout === "list" ? "active" : ""
@@ -153,7 +184,7 @@ function NotesApp() {
         {notes.length > 0 ? (
           <ul className={`notes-list ${layout}`}>
             {notes.map((note) => (
-              <NoteCard key={note.id} note={note} />
+              <NoteCard key={note.id} note={note} onDelete={handleDeleteNote} />
             ))}
           </ul>
         ) : (

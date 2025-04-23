@@ -102,6 +102,16 @@ $transition-normal: all 0.3s ease-in-out;
             width: 150px;
             text-align: center;
         }
+
+        .changeuserbtn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-right: 10px;
+            button {
+                font-family: Poppins;
+            }
+        }
     }
     .btn {
         background-color: $accent-color;
