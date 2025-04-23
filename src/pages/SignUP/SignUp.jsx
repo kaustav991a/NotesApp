@@ -20,7 +20,7 @@ const navigate = useNavigate();
 
     })
 
-    const handleSubmit = async (e) => {
+    const handleSignUp = async (e) => {
         e.preventDefault();
         try {
             const res = await createUserWithEmailAndPassword(auth, user.email, user.password);
@@ -35,7 +35,6 @@ const navigate = useNavigate();
                 }
             )
              console.log("data added succesfully");
-            console.log(res.user.email);
             
             navigate('/notes');
         } catch (error) {
@@ -54,7 +53,7 @@ const navigate = useNavigate();
                             <div className="auth-wrap">
                                 <Link to="/" className="nextBackBtn"> <FaArrowLeft /></Link>
                                 <h3 className='title-border'>Sign Up Your Account</h3>
-                                <form className='form-sec' onSubmit={handleSubmit} >
+                                <form className='form-sec' onSubmit={handleSignUp} >
 
                                     <div className="inpt-wrp">
                                         <input type="text" placeholder='Full Name' value={user.name} onChange={(e) => { setUser({ ...user, name: e.target.value }) }} />
