@@ -9,7 +9,7 @@ function NotePopup({ note, onClose }) {
 
   return (
     <div className="note-popup-overlay">
-      <div className="note-popup">
+      <div className="note-popu">
         <button className="close-button" onClick={onClose}>
           <IoClose />
         </button>
