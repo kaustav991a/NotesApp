@@ -67,6 +67,16 @@ button {
     transition: background-color 0.3s ease;
 }
 
+// .btn,
+// a,
+// button {
+//     transform: scale(1);
+//     &:active,
+//     &:focus {
+//         transform: scale(0.9);
+//     }
+// }
+
 .form-sec {
     .inpt-wrp {
         position: relative;
@@ -91,7 +101,7 @@ button {
         &[type="submit"] {
             padding: 0.5rem 2rem;
             background: #000;
-            margin-top: 1.3rem;
+            // margin-top: 1.3rem;
             border-radius: 1.5rem;
             color: #fff;
             font-family: "Poppins", sans-serif;
@@ -117,4 +127,13 @@ button {
         font-size: 1rem;
         font-weight: 400;
     }
+}
+
+.error-message {
+    background-color: darkred;
+    color: lightgoldenrodyellow;
+    padding: 7px 15px;
+    font-size: 12px;
+    display: inline-block;
+    border-radius: 20px;
 }

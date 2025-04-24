@@ -42,8 +42,19 @@ $transition-normal: all 0.3s ease-in-out;
         // transform: translateY(-4px);
         transform: scale(0.99);
         box-shadow: 0 6px 12px color.adjust($shadow-color, $lightness: 10%);
-        .delete-button {
+        .delete-button,
+        .edit-button,
+        .star-button {
             opacity: 1;
+        }
+    }
+    &.starred {
+        .star-button {
+            opacity: 1;
+            height: 30px;
+            width: 30px;
+            right: auto;
+            left: 0;
         }
     }
     .delete-button {
@@ -52,6 +63,24 @@ $transition-normal: all 0.3s ease-in-out;
         position: absolute;
         right: 0;
         top: 0;
+        bottom: 50%;
+        border: none;
+        width: 60px;
+        // height: 40px;
+        opacity: 0;
+        transition: all 0.3s ease-in-out;
+        // border-radius: 50%;
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .edit-button {
+        background-color: #3f3f3f;
+        color: white;
+        position: absolute;
+        right: 0;
+        top: 50%;
         bottom: 0;
         border: none;
         width: 60px;
@@ -63,6 +92,19 @@ $transition-normal: all 0.3s ease-in-out;
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+    .star-button {
+        height: 50%;
+        display: flex;
+        border: none;
+        align-items: center;
+        justify-content: center;
+        background: #ffeb3b;
+        position: absolute;
+        top: 0;
+        right: 60px;
+        width: 60px;
+        opacity: 0;
     }
     .note-link {
         display: block;

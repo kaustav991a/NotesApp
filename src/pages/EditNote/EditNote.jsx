@@ -4,6 +4,7 @@ import "./EditNote.scss";
 import { db } from "../../firebase/index"; // Adjust path as needed
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import { useAuth } from "../../Context/UserContext"; // Import useAuth hook
 
 function EditNote() {
   const { noteId } = useParams();
@@ -20,9 +21,7 @@ function EditNote() {
   const [notificationMessage, setNotificationMessage] = useState("");
   const [notificationType, setNotificationType] = useState("");
   const contentInputRef = useRef(null);
-
-  // TEMPORARY USER ID FOR TESTING
-  const tempUserId = "test-user-id-123";
+  const { currentUser } = useAuth(); // Get currentUser from AuthContext
 
   useEffect(() => {
     const fetchNote = async () => {
@@ -30,14 +29,14 @@ function EditNote() {
       setSaveError(null);
 
       try {
-        if (!tempUserId || !noteId) {
+        if (!currentUser?.uid || !noteId) {
           console.error("User ID or Note ID not found.");
           setSaveError("Could not load note.");
           setLoading(false);
           return;
         }
 
-        const noteDocRef = doc(db, `users/${tempUserId}/notes`, noteId);
+        const noteDocRef = doc(db, `users/${currentUser.uid}/notes`, noteId); // Use currentUser.uid
         const docSnap = await getDoc(noteDocRef);
 
         if (docSnap.exists()) {
@@ -60,7 +59,7 @@ function EditNote() {
     };
 
     fetchNote();
-  }, [noteId]);
+  }, [noteId, currentUser?.uid]); // зависимость от noteId и currentUser.uid
 
   useEffect(() => {
     setIsContentChanged(title !== originalTitle || content !== originalContent);
@@ -92,14 +91,14 @@ function EditNote() {
     setShowNotification(false);
 
     try {
-      if (!tempUserId || !noteId) {
+      if (!currentUser?.uid || !noteId) {
         console.error("User ID or Note ID not found.");
         setSaveError("Could not save note.");
         setIsSaving(false);
         return;
       }
 
-      const noteDocRef = doc(db, `users/${tempUserId}/notes`, noteId);
+      const noteDocRef = doc(db, `users/${currentUser.uid}/notes`, noteId); // Use currentUser.uid
       const updatedAt = new Date().toISOString();
 
       await updateDoc(noteDocRef, {
@@ -110,7 +109,7 @@ function EditNote() {
 
       console.log(
         "Note updated successfully for user:",
-        tempUserId,
+        currentUser.uid,
         "noteId:",
         noteId
       );

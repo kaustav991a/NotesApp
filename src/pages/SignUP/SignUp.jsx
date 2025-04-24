@@ -1,25 +1,26 @@
-import React, { useState } from 'react';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import React, { useState } from "react";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from '../../firebase';
+import { auth, db } from "../../firebase";
 import "./SignUp.scss";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa6";
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc } from "firebase/firestore";
+// import { ToastContainer, toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
 
 function SignUp() {
-    const navigate = useNavigate();
+      const navigate = useNavigate();
 
-    const [user, setUser] = useState({
-        name: "",
-        email: "",
-        username: "",
-        password: "",
-        confirmPassword: "",
-        acceptedTerms: false
-    });
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    username: "",
+    password: "",
+    confirmPassword: "",
+    acceptedTerms: false,    });
 
     const [errors, setErrors] = useState({
         name: "",
@@ -27,8 +28,10 @@ function SignUp() {
         username: "",
         password: "",
         confirmPassword: "",
-        acceptedTerms: ""
-    });
+        acceptedTerms: "",
+    gender: "male",
+  });
+//   const [error, setError] = useState("");;
 
     const handleSignUp = async (e) => {
         e.preventDefault();

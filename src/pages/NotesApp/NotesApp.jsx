@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./NotesApp.scss";
 import NoteCard from "../../components/NoteCard/NoteCard";
-import { FaList, FaTh } from "react-icons/fa";
-import { db } from "../../firebase/index"; // Import Firebase
+import NotePopup from "../../components/NotePopup/NotePopup";
+import { FaList, FaTh, FaStar, FaRegStar } from "react-icons/fa"; // Import star icons
+import maleProfile from "../../assets/images/profile-male.png";
+import femaleProfile from "../../assets/images/profile-female.png";
+import { db } from "../../firebase/index";
 import {
   collection,
   onSnapshot,
@@ -11,48 +14,106 @@ import {
   orderBy,
   deleteDoc,
   doc,
+  getDoc,
+  updateDoc,
 } from "firebase/firestore";
+import { useAuth } from "../../Context/UserContext";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 function NotesApp() {
   const [layout, setLayout] = useState("list");
+  const [saveError, setSaveError] = useState(null);
+  const [active, setActive] = useState(false);
+  const [currentUserGender, setCurrentUserGender] = useState("male");
+  const [userLayout, setUserLayout] = useState("list");
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentUser, setCurrentUser] = useState("user1"); // Default to user1
+  const [selectedNote, setSelectedNote] = useState(null);
 
-  const toggleLayout = (newLayout) => {
+  const navigate = useNavigate();
+  const { logout, currentUser } = useAuth();
+
+  const toggleClick = () => {
+    setActive(!active);
+  };
+
+  const handleLogout = async () => {
+    setError(null);
+    try {
+      await logout();
+      navigate("/signin");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      setError(error.message);
+    }
+  };
+
+  const toggleLayout = async (newLayout) => {
     setLayout(newLayout);
+    setUserLayout(newLayout);
+    if (currentUser?.uid) {
+      try {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userDocRef, {
+          layout: newLayout,
+        });
+        console.log("User layout preference updated in Firestore.");
+      } catch (error) {
+        console.error("Error updating user layout preference:", error);
+        setError("Failed to save layout preference.");
+      }
+    }
   };
 
-  const switchUser = (user) => {
-    setCurrentUser(user);
-  };
+  useEffect(() => {
+    const fetchUserGenderAndLayout = async () => {
+      if (currentUser?.uid) {
+        try {
+          const userDocRef = doc(db, "users", currentUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
 
-  // TEMPORARY USER IDs FOR TESTING
-  const tempUser1Id = "test-user-id-123";
-  const tempUser2Id = "another-test-user-456";
-
-  const getCurrentUserId = () => {
-    return currentUser === "user1" ? tempUser1Id : tempUser2Id;
-  };
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            if (userData.gender) {
+              setCurrentUserGender(userData.gender);
+            }
+            if (userData.layout) {
+              setUserLayout(userData.layout);
+              setLayout(userData.layout);
+            }
+          } else {
+            console.log("User document does not exist");
+            setCurrentUserGender("male");
+          }
+        } catch (error) {
+          console.error("Error fetching user data: ", error);
+          setError("Failed to fetch user data.");
+          setCurrentUserGender("male");
+        }
+      } else {
+        setCurrentUserGender("male");
+      }
+    };
+    fetchUserGenderAndLayout();
+  }, [currentUser?.uid]);
 
   useEffect(() => {
     const fetchNotes = async () => {
       setLoading(true);
       setError(null);
-      const currentUserId = getCurrentUserId();
 
       try {
-        if (!currentUserId) {
-          console.error("Current user ID not set.");
-          setError("Current user ID not set.");
+        if (!currentUser?.uid) {
+          console.log("No user logged in.");
+          setNotes([]);
           setLoading(false);
           return;
         }
 
         const notesCollectionRef = collection(
           db,
-          `users/${currentUserId}/notes`
+          `users/${currentUser.uid}/notes`
         );
         const q = query(notesCollectionRef, orderBy("createdAt", "desc"));
 
@@ -62,6 +123,7 @@ function NotesApp() {
             const fetchedNotes = snapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
+              isStarred: doc.data().isStarred || false, // Ensure isStarred exists
             }));
             setNotes(fetchedNotes);
             setLoading(false);
@@ -82,63 +144,96 @@ function NotesApp() {
     };
 
     fetchNotes();
-  }, [currentUser]); // Re-fetch notes when the currentUser changes
+  }, [currentUser?.uid]);
 
   const handleDeleteNote = async (noteId) => {
-    const currentUserId = getCurrentUserId();
+    if (!currentUser?.uid) {
+      setError("No user logged in.");
+      return;
+    }
+
     try {
-      if (!currentUserId) {
-        setError("User ID is not available.");
-        return;
-      }
-
-      const noteDocRef = doc(db, `users/${currentUserId}/notes`, noteId);
+      const noteDocRef = doc(db, `users/${currentUser.uid}/notes`, noteId);
       await deleteDoc(noteDocRef);
-
       setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
-
-      console.log(
-        `Note with ID ${noteId} deleted successfully for user ${currentUserId}.`
-      );
+      console.log(`Note with ID ${noteId} deleted successfully.`);
     } catch (err) {
       setError("Failed to delete note. Please try again.");
       console.error("Error deleting note:", err);
     }
   };
 
+  const openNotePopup = (note) => {
+    setSelectedNote(note);
+  };
+
+  const closeNotePopup = () => {
+    setSelectedNote(null);
+  };
+
+  const toggleStar = async (noteId) => {
+    if (!currentUser?.uid) {
+      setError("No user logged in.");
+      return;
+    }
+
+    try {
+      const noteDocRef = doc(db, `users/${currentUser.uid}/notes`, noteId);
+      const currentNote = notes.find((n) => n.id === noteId);
+      if (!currentNote) return; //prevent error if note doesnt exist
+      const newStarValue = !currentNote.isStarred;
+      await updateDoc(noteDocRef, {
+        isStarred: newStarValue,
+      });
+
+      setNotes((prevNotes) =>
+        prevNotes.map((note) =>
+          note.id === noteId ? { ...note, isStarred: newStarValue } : note
+        )
+      );
+      console.log(`Note with ID ${noteId} starred status toggled.`);
+    } catch (err) {
+      setError("Failed to update star status.");
+      console.error("Error updating star status:", err);
+    }
+  };
+
+  const sortedNotes = [...notes].sort((a, b) => {
+    if (a.isStarred && !b.isStarred) return -1;
+    if (!a.isStarred && b.isStarred) return 1;
+    return 0;
+  });
+
   if (loading) {
     return (
-      <div className={`notes-list-container ${layout}`}>
-        <header className="notes-list-header">
-          <h1>Your Notes</h1>
-          <div className="changelayout">
-            <button className="layout-toggle-btn skeleton" disabled>
-              <FaList />
-            </button>
-            <button className="layout-toggle-btn skeleton" disabled>
-              <FaTh />
-            </button>
-            <div className="btn skeleton">Create New Note</div>
-          </div>
+      <div className="edit-note-container">
+        <header className="edit-note-header">
+          <h1>
+            <Link to="/notes">
+              <IoMdArrowRoundBack />
+            </Link>
+            Edit Note
+          </h1>
         </header>
-        <ul style={{ opacity: 0.1 }} className={`notes-list ${layout}`}>
-          {Array.from({ length: 3 }).map((_, index) => (
-            <li key={index} className="note-item skeleton-item">
-              <div className="note-link">
-                <h3 className="skeleton skeleton-title"></h3>
-                <p className="skeleton skeleton-content"></p>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className="loading-spinner-centered">
+          <div className="loading-spinner-circular"></div>
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  if (saveError) {
     return (
-      <div className={`fullpage notes-list-container ${layout}`}>
-        <p className="error-message">Error: {error}</p>;
+      <div className="edit-note-container">
+        <header className="edit-note-header">
+          <h1>
+            <Link to="/notes">
+              <IoMdArrowRoundBack />
+            </Link>
+            Edit Note
+          </h1>
+        </header>
+        <p className="error-message">{saveError}</p>
       </div>
     );
   }
@@ -149,13 +244,10 @@ function NotesApp() {
         <header className="notes-list-header">
           <h1>Your Notes</h1>
           <div className="changelayout">
-            <div className="changeuserbtn">
-              <button className="btn" onClick={() => switchUser("user1")}>
-                Switch to User 1
-              </button>
-              <button className="btn" onClick={() => switchUser("user2")}>
-                Switch to User 2
-              </button>
+            <div className="activestatus">
+              <span className="status active" title={currentUser?.email || ""}>
+                active
+              </span>
             </div>
             <button
               className={`layout-toggle-btn ${
@@ -178,13 +270,55 @@ function NotesApp() {
             <Link to="/create-note" className="btn">
               Create New Note
             </Link>
+
+            <div className="profileimg">
+              <button onClick={toggleClick}>
+                <img
+                  src={
+                    currentUserGender === "male" ? maleProfile : femaleProfile
+                  }
+                  alt="Profile"
+                />
+              </button>
+            </div>
+
+            <div className={`dropdown ${active ? "active" : ""}`}>
+              <ul>
+                <li>
+                  <Link to="#!">My Account</Link>
+                </li>
+                <li className="logout">
+                  <Link onClick={handleLogout}>Logout</Link>
+                </li>
+              </ul>
+            </div>
           </div>
         </header>
 
         {notes.length > 0 ? (
           <ul className={`notes-list ${layout}`}>
-            {notes.map((note) => (
-              <NoteCard key={note.id} note={note} onDelete={handleDeleteNote} />
+            {sortedNotes.map((note) => (
+              <NoteCard
+                key={note.id}
+                note={note}
+                onDelete={handleDeleteNote}
+                onNoteClick={openNotePopup}
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent card click when starring
+                    toggleStar(note.id);
+                  }}
+                  className="star-button"
+                  title={note.isStarred ? "Unstar Note" : "Star Note"}
+                >
+                  {note.isStarred ? (
+                    <FaStar className="star-icon starred" />
+                  ) : (
+                    <FaRegStar className="star-icon" />
+                  )}
+                </button>
+              </NoteCard>
             ))}
           </ul>
         ) : (
@@ -193,6 +327,10 @@ function NotesApp() {
           </p>
         )}
       </div>
+
+      {selectedNote && (
+        <NotePopup note={selectedNote} onClose={closeNotePopup} />
+      )}
     </>
   );
 }

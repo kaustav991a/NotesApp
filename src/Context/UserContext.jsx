@@ -1,19 +1,53 @@
-import { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
+import { auth } from "../firebase/index"; // Assuming you have your Firebase auth instance here
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
 
 const UserContext = createContext();
 
-export const UserProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState("user1"); // Manage user state here
+export const AuthProvider = ({ children }) => {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleUserSwitch = (user) => {
-    setCurrentUser(user);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  const signup = (email, password) => {
+    return createUserWithEmailAndPassword(auth, email, password);
+  };
+
+  const login = (email, password) => {
+    return signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const logout = () => {
+    return signOut(auth); // This is the logout function you need
+  };
+
+  const value = {
+    currentUser,
+    signup,
+    login,
+    logout,
+    loading,
   };
 
   return (
-    <UserContext.Provider value={{ currentUser, handleUserSwitch }}>
-      {children}
+    <UserContext.Provider value={value}>
+      {!loading && children}
     </UserContext.Provider>
   );
 };
 
-export const useUser = () => useContext(UserContext);
+export const useAuth = () => {
+  return useContext(UserContext);
+};
