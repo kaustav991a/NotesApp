@@ -33,7 +33,6 @@ function SignUp() {
     const handleSignUp = async (e) => {
         e.preventDefault();
         
-        // Reset previous errors
         setErrors({
             name: "",
             email: "",
@@ -45,7 +44,7 @@ function SignUp() {
 
         let valid = true;
 
-        // Validate each field
+      
         if (!user.name.trim()) {
             setErrors(prev => ({ ...prev, name: "Full Name is required" }));
             valid = false;
@@ -81,9 +80,9 @@ function SignUp() {
             valid = false;
         }
 
-        if (!valid) return;
+        if (!valid) return   ;
 
-        // Proceed with signup if valid
+   
         try {
             const res = await createUserWithEmailAndPassword(auth, user.email, user.password);
             const uid = res.user.uid;
