@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./NotesApp.scss";
 import NoteCard from "../../components/NoteCard/NoteCard";
-import NotePopup from "../../components/NotePopup/NotePopup"; // Import the new popup component
-import { FaList, FaTh } from "react-icons/fa";
+import NotePopup from "../../components/NotePopup/NotePopup";
+import { FaList, FaTh, FaStar, FaRegStar } from "react-icons/fa"; // Import star icons
+import maleProfile from "../../assets/images/profile-male.png";
+import femaleProfile from "../../assets/images/profile-female.png";
 import { db } from "../../firebase/index";
 import {
   collection,
@@ -12,20 +14,89 @@ import {
   orderBy,
   deleteDoc,
   doc,
+  getDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { useAuth } from "../../Context/UserContext";
+import { IoMdArrowRoundBack } from "react-icons/io";
 
 function NotesApp() {
   const [layout, setLayout] = useState("list");
+  const [saveError, setSaveError] = useState(null);
+  const [active, setActive] = useState(false);
+  const [currentUserGender, setCurrentUserGender] = useState("male");
+  const [userLayout, setUserLayout] = useState("list");
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { currentUser } = useAuth();
-  const [selectedNote, setSelectedNote] = useState(null); // State for the selected note to show in the popup
+  const [selectedNote, setSelectedNote] = useState(null);
 
-  const toggleLayout = (newLayout) => {
-    setLayout(newLayout);
+  const navigate = useNavigate();
+  const { logout, currentUser } = useAuth();
+
+  const toggleClick = () => {
+    setActive(!active);
   };
+
+  const handleLogout = async () => {
+    setError(null);
+    try {
+      await logout();
+      navigate("/signin");
+    } catch (error) {
+      console.error("Error logging out:", error);
+      setError(error.message);
+    }
+  };
+
+  const toggleLayout = async (newLayout) => {
+    setLayout(newLayout);
+    setUserLayout(newLayout);
+    if (currentUser?.uid) {
+      try {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userDocRef, {
+          layout: newLayout,
+        });
+        console.log("User layout preference updated in Firestore.");
+      } catch (error) {
+        console.error("Error updating user layout preference:", error);
+        setError("Failed to save layout preference.");
+      }
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserGenderAndLayout = async () => {
+      if (currentUser?.uid) {
+        try {
+          const userDocRef = doc(db, "users", currentUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            if (userData.gender) {
+              setCurrentUserGender(userData.gender);
+            }
+            if (userData.layout) {
+              setUserLayout(userData.layout);
+              setLayout(userData.layout);
+            }
+          } else {
+            console.log("User document does not exist");
+            setCurrentUserGender("male");
+          }
+        } catch (error) {
+          console.error("Error fetching user data: ", error);
+          setError("Failed to fetch user data.");
+          setCurrentUserGender("male");
+        }
+      } else {
+        setCurrentUserGender("male");
+      }
+    };
+    fetchUserGenderAndLayout();
+  }, [currentUser?.uid]);
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -52,6 +123,7 @@ function NotesApp() {
             const fetchedNotes = snapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
+              isStarred: doc.data().isStarred || false, // Ensure isStarred exists
             }));
             setNotes(fetchedNotes);
             setLoading(false);
@@ -99,18 +171,69 @@ function NotesApp() {
     setSelectedNote(null);
   };
 
+  const toggleStar = async (noteId) => {
+    if (!currentUser?.uid) {
+      setError("No user logged in.");
+      return;
+    }
+
+    try {
+      const noteDocRef = doc(db, `users/${currentUser.uid}/notes`, noteId);
+      const currentNote = notes.find((n) => n.id === noteId);
+      if (!currentNote) return; //prevent error if note doesnt exist
+      const newStarValue = !currentNote.isStarred;
+      await updateDoc(noteDocRef, {
+        isStarred: newStarValue,
+      });
+
+      setNotes((prevNotes) =>
+        prevNotes.map((note) =>
+          note.id === noteId ? { ...note, isStarred: newStarValue } : note
+        )
+      );
+      console.log(`Note with ID ${noteId} starred status toggled.`);
+    } catch (err) {
+      setError("Failed to update star status.");
+      console.error("Error updating star status:", err);
+    }
+  };
+
+  const sortedNotes = [...notes].sort((a, b) => {
+    if (a.isStarred && !b.isStarred) return -1;
+    if (!a.isStarred && b.isStarred) return 1;
+    return 0;
+  });
+
   if (loading) {
     return (
-      <div className={`notes-list-container ${layout}`}>
-        {/* ... (loading indicator) ... */}
+      <div className="edit-note-container">
+        <header className="edit-note-header">
+          <h1>
+            <Link to="/notes">
+              <IoMdArrowRoundBack />
+            </Link>
+            Edit Note
+          </h1>
+        </header>
+        <div className="loading-spinner-centered">
+          <div className="loading-spinner-circular"></div>
+        </div>
       </div>
     );
   }
 
-  if (error) {
+  if (saveError) {
     return (
-      <div className={`fullpage notes-list-container ${layout}`}>
-        <p className="error-message">Error: {error}</p>;
+      <div className="edit-note-container">
+        <header className="edit-note-header">
+          <h1>
+            <Link to="/notes">
+              <IoMdArrowRoundBack />
+            </Link>
+            Edit Note
+          </h1>
+        </header>
+        <p className="error-message">{saveError}</p>
       </div>
     );
   }
@@ -121,7 +244,11 @@ function NotesApp() {
         <header className="notes-list-header">
           <h1>Your Notes</h1>
           <div className="changelayout">
-            {currentUser?.email && <p>Logged in as: {currentUser.email}</p>}
+            <div className="activestatus">
+              <span className="status active" title={currentUser?.email || ""}>
+                active
+              </span>
+            </div>
             <button
               className={`layout-toggle-btn ${
                 layout === "list" ? "active" : ""
@@ -143,18 +270,55 @@ function NotesApp() {
             <Link to="/create-note" className="btn">
               Create New Note
             </Link>
+
+            <div className="profileimg">
+              <button onClick={toggleClick}>
+                <img
+                  src={
+                    currentUserGender === "male" ? maleProfile : femaleProfile
+                  }
+                  alt="Profile"
+                />
+              </button>
+            </div>
+
+            <div className={`dropdown ${active ? "active" : ""}`}>
+              <ul>
+                <li>
+                  <Link to="#!">My Account</Link>
+                </li>
+                <li className="logout">
+                  <Link onClick={handleLogout}>Logout</Link>
+                </li>
+              </ul>
+            </div>
           </div>
         </header>
 
         {notes.length > 0 ? (
           <ul className={`notes-list ${layout}`}>
-            {notes.map((note) => (
+            {sortedNotes.map((note) => (
               <NoteCard
                 key={note.id}
                 note={note}
                 onDelete={handleDeleteNote}
-                onNoteClick={openNotePopup} // Pass the openPopup function to NoteCard
-              />
+                onNoteClick={openNotePopup}
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent card click when starring
+                    toggleStar(note.id);
+                  }}
+                  className="star-button"
+                  title={note.isStarred ? "Unstar Note" : "Star Note"}
+                >
+                  {note.isStarred ? (
+                    <FaStar className="star-icon starred" />
+                  ) : (
+                    <FaRegStar className="star-icon" />
+                  )}
+                </button>
+              </NoteCard>
             ))}
           </ul>
         ) : (

@@ -87,3 +87,15 @@ h3 {
         }
     }
 }
+.inpt-wrp {
+    select {
+        width: 100%;
+        padding: 15px 0;
+        border: none;
+        background-color: #ffffff;
+        min-height: 50px;
+        font-family: "Poppins", sans-serif;
+        border-bottom: 1px solid #eaeaea;
+        color: #757575;
+    }
+}

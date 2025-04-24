@@ -43,8 +43,18 @@ $transition-normal: all 0.3s ease-in-out;
         transform: scale(0.99);
         box-shadow: 0 6px 12px color.adjust($shadow-color, $lightness: 10%);
         .delete-button,
-        .edit-button {
+        .edit-button,
+        .star-button {
             opacity: 1;
+        }
+    }
+    &.starred {
+        .star-button {
+            opacity: 1;
+            height: 30px;
+            width: 30px;
+            right: auto;
+            left: 0;
         }
     }
     .delete-button {
@@ -82,6 +92,19 @@ $transition-normal: all 0.3s ease-in-out;
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+    .star-button {
+        height: 50%;
+        display: flex;
+        border: none;
+        align-items: center;
+        justify-content: center;
+        background: #ffeb3b;
+        position: absolute;
+        top: 0;
+        right: 60px;
+        width: 60px;
+        opacity: 0;
     }
     .note-link {
         display: block;

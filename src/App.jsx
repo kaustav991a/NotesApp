@@ -1,6 +1,7 @@
 import { RouterProvider } from "react-router-dom";
 import { AuthProvider } from "./Context/UserContext"; // Import UserProvider
-import { useAuth } from "./Context/UserContext"; // If your folder is named "Context"
+import "../node_modules/bootstrap/dist/css/bootstrap.css";
+import "react-toastify/dist/ReactToastify.css";
 
 import "./styles/base.scss";
 import router from "./Routes";
