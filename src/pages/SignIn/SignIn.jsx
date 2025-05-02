@@ -12,65 +12,59 @@ import { FaArrowLeft } from "react-icons/fa6";
 
 function SignIn() {
   const navigate = useNavigate();
+
   const [user, setUser] = useState({
     email: "",
     password: "",
     acceptedTerms: false,
   });
-  const [error, setError] = useState("");
+
+  const [errors, setErrors] = useState({
+    username: "",
+    password: "",
+    firebaseError: ""
+  });
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    setError("");
-    toast.info("Signing you in...", {
-      position: "top-right",
-      autoClose: false,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: false,
-      progress: undefined,
-      theme: "light",
+
+    setErrors({
+      username: "",
+      password: "",
+      firebaseError: ""
     });
 
-    // Simulate a 3-second delay
-    setTimeout(async () => {
-      try {
-        const res = await signInWithEmailAndPassword(
-          auth,
-          user.email,
-          user.password
-        );
-        if (res) {
-          toast.dismiss();
-          toast.success("Signed in successfully!", {
-            position: "top-center",
-            autoClose: 3000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-          });
-          navigate("/notes");
-        }
-      } catch (error) {
-        console.log(error);
-        setError(error.message);
-        toast.dismiss();
-        toast.error(`Error: ${error.message}`, {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
+    let valid = true;
+
+    switch (true) {
+      case !user.email.trim():
+        setErrors(prev => ({ ...prev, username: "Email is required" }));
+        valid = false;
+        break;
+
+      case !user.password.trim():
+        setErrors(prev => ({ ...prev, password: "Password is required" }));
+        valid = false;
+        break;
+
+      default:
+        break;
+    }
+
+    if (!valid) return;
+
+    try {
+      const res = await signInWithEmailAndPassword(
+        auth,
+        user.email,
+        user.password
+      );
+      if (res) {
+        navigate("/notes");
       }
-    }, 2000); // 2000 milliseconds = 2 seconds
+    } catch (error) {
+      setErrors(prev => ({ ...prev, firebaseError: error.message }));
+    }
   };
 
   return (
@@ -82,20 +76,20 @@ function SignIn() {
             <Col lg={12}>
               <div className="auth-wrap">
                 <Link to="/" className="nextBackBtn">
-                  {" "}
                   <FaArrowLeft />
                 </Link>
                 <h3 className="title-border">Sign In To Your Account</h3>
                 <form className="form-sec" onSubmit={handleSignIn}>
                   <div className="inpt-wrp">
                     <input
-                      type="text"
+                      type="email"
                       placeholder="Email"
                       value={user.email}
                       onChange={(e) => {
                         setUser({ ...user, email: e.target.value });
                       }}
                     />
+                    {errors.username && <p className="error">{errors.username}</p>}
                   </div>
                   <div className="inpt-wrp">
                     <input
@@ -106,14 +100,18 @@ function SignIn() {
                         setUser({ ...user, password: e.target.value });
                       }}
                     />
+                    {errors.password && <p className="error">{errors.password}</p>}
                   </div>
-                  {error && <p className="error-message">{error}</p>}
+                  {errors.firebaseError && <p className="error">{errors.firebaseError}</p>}
                   <div className="inpt-wrp submit">
                     <input type="submit" value="Sign In" />
                   </div>
                   <div className="inpt-wrp">
                     <h6>
-                      New here? <Link to="/signup">Let's create a account</Link>
+                      New here? <Link to="/signup">Let's create an account</Link>
+                    </h6>
+                    <h6>
+                      don't panic <Link to="/resetpassword">Forgot password?</Link>
                     </h6>
                   </div>
                 </form>

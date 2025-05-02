@@ -10,9 +10,13 @@ import { useState } from 'react';
 
 function ResetPassword() {
     const [user , setUser] = useState();
-    
+    const [error , setError] = useState();
+
     const handleReset = async (e) =>{
        e.preventDefault();
+       if(!user){
+        setError("please enter a valid email");
+       }
       try{
             await sendPasswordResetEmail (auth , user);
            alert("password reset link is shared over email");
@@ -26,13 +30,15 @@ function ResetPassword() {
                 <Row>
                     <Col lg={12}>
                         <div className="auth-wrap">
-                            <Link to="/" className="nextBackBtn"> <FaArrowLeft /></Link>
+                            <Link to="/signin" className="nextBackBtn"> <FaArrowLeft /></Link>
                             <h3 className='title-border'>Reset Your Password</h3>
                             <form className='form-sec' onSubmit={handleReset}>
                                
                                 <div className="inpt-wrp">
                                     <input type="email" placeholder='Enter your email or username ' value={user} onChange={(e)=>{setUser(e.target.value)}} />
+                                    {error && <p className='error'>{error}</p>}
                                 </div>
+
                                 <div className="inpt-wrp submit">
                                     <input type="submit" value='Reset' />
                                 </div>

@@ -12,15 +12,18 @@ import { doc, setDoc } from "firebase/firestore";
 // import "react-toastify/dist/ReactToastify.css";
 
 function SignUp() {
-      const navigate = useNavigate();
+    const navigate = useNavigate();
+    const [passwordStrength, setPasswordStrength] = useState("");
 
-  const [user, setUser] = useState({
-    name: "",
-    email: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-    acceptedTerms: false,    });
+
+    const [user, setUser] = useState({
+        name: "",
+        email: "",
+        username: "",
+        password: "",
+        confirmPassword: "",
+        acceptedTerms: false,
+    });
 
     const [errors, setErrors] = useState({
         name: "",
@@ -29,63 +32,51 @@ function SignUp() {
         password: "",
         confirmPassword: "",
         acceptedTerms: "",
-    gender: "male",
-  });
-//   const [error, setError] = useState("");;
+        gender: "male",
+        all : "",
+    });
+
+ 
+
+    const getPasswordStrength = (password) => {
+    if (password.length < 6) return "Weak";
+    if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(password)) return "Strong";
+    if (/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/.test(password)) return "Medium";
+    return "Weak";
+};
+
+    const validateFields = (name, value) => {
+
+        switch (name) {
+            case "name":
+                return value.trim().length < 3 ? "Please enter a valid name" : "";
+
+            case "email":
+                return !/^\S+@\S+\.\S+$/.test(value) ? "Invalid email format" : "";
+
+            case "username":
+                return value.trim() === "" ? "Username is required" : "";
+
+            case "password":
+                return !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/.test(value)
+                    ? "Weak password (8+ chars, upper, lower, number, special)"
+                    : "";
+
+            case "confirmPassword":
+                return value !== user.password ? "Passwords do not match" : "";
+
+            case "acceptedTerms":
+                return !value ? "Accept the terms" : "";
+
+            default:
+                return "";
+        }
+    };
+
+    //   const [error, setError] = useState("");;
 
     const handleSignUp = async (e) => {
         e.preventDefault();
-        
-        setErrors({
-            name: "",
-            email: "",
-            username: "",
-            password: "",
-            confirmPassword: "",
-            acceptedTerms: ""
-        });
-
-        let valid = true;
-
-      
-        if (!user.name.trim()) {
-            setErrors(prev => ({ ...prev, name: "Full Name is required" }));
-            valid = false;
-        }
-
-        if (!user.email.trim()) {
-            setErrors(prev => ({ ...prev, email: "Email is required" }));
-            valid = false;
-        }
-
-        if (!user.username.trim()) {
-            setErrors(prev => ({ ...prev, username: "Username is required" }));
-            valid = false;
-        }
-
-        if (!user.password.trim()) {
-            setErrors(prev => ({ ...prev, password: "Password is required" }));
-            valid = false;
-        }
-
-        if (!user.confirmPassword.trim()) {
-            setErrors(prev => ({ ...prev, confirmPassword: "Confirm Password is required" }));
-            valid = false;
-        }
-
-        if (user.password !== user.confirmPassword) {
-            setErrors(prev => ({ ...prev, confirmPassword: "Passwords do not match" }));
-            valid = false;
-        }
-
-        if (!user.acceptedTerms) {
-            setErrors(prev => ({ ...prev, acceptedTerms: "You must accept the terms and conditions" }));
-            valid = false;
-        }
-
-        if (!valid) return   ;
-
-   
         try {
             const res = await createUserWithEmailAndPassword(auth, user.email, user.password);
             const uid = res.user.uid;
@@ -102,6 +93,7 @@ function SignUp() {
             navigate("/notes");
         } catch (err) {
             console.log(err);
+            setErrors({ ...errors, all: err.message });
         }
     };
 
@@ -121,7 +113,10 @@ function SignUp() {
                                         type="text"
                                         placeholder='Full Name'
                                         value={user.name}
-                                        onChange={(e) => setUser({ ...user, name: e.target.value })}
+                                        onChange={(e) => {
+                                            setUser({ ...user, name: e.target.value });
+                                            setErrors({ ...errors, name: validateFields("name", e.target.value) });
+                                        }}
                                     />
                                     {errors.name && <p className="error">{errors.name}</p>}
                                 </div>
@@ -130,16 +125,27 @@ function SignUp() {
                                         type="email"
                                         placeholder='Email'
                                         value={user.email}
-                                        onChange={(e) => setUser({ ...user, email: e.target.value })}
+                                        onChange={(e) => {
+                                            setUser({ ...user, email: e.target.value });
+                                            setErrors({ ...errors, email: validateFields("email", e.target.value) });
+                                        }
+
+                                        }
+                                      
                                     />
-                                    {errors.email && <p className="error">{errors.email}</p>}
+                                    {errors.email && <p className="error">please enter a valid email</p>}
                                 </div>
                                 <div className="inpt-wrp">
                                     <input
                                         type="text"
                                         placeholder='Username'
                                         value={user.username}
-                                        onChange={(e) => setUser({ ...user, username: e.target.value })}
+                                        onChange={
+                                            (e) => {
+                                                setUser({ ...user, username: e.target.value });
+                                                setErrors({ ...errors, username: validateFields("username", e.target.value) });
+                                            }
+                                        }
                                     />
                                     {errors.username && <p className="error">{errors.username}</p>}
                                 </div>
@@ -148,34 +154,67 @@ function SignUp() {
                                         type="password"
                                         placeholder='Password'
                                         value={user.password}
-                                        onChange={(e) => setUser({ ...user, password: e.target.value })}
+
+                                        onChange={
+                                            (e) => {
+                                                setUser({ ...user, password: e.target.value });
+                                                setErrors({ ...errors, password: validateFields("password", e.target.value) });
+                                                 setPasswordStrength(getPasswordStrength(e.target.value));
+                                            }
+                                        }
+                                        
                                     />
-                                    {errors.password && <p className="error">{errors.password}</p>}
+                                     {
+                                        user.password && (
+                                            <>
+                                              <p className={`strength ${passwordStrength.toLowerCase()}`}>
+                                                Strength: {passwordStrength}
+                                            </p>
+                                            <div className={`indicator ${passwordStrength.toLowerCase()}`}>
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                            </>
+                                        )
+                                    }
                                 </div>
                                 <div className="inpt-wrp">
                                     <input
                                         type="password"
                                         placeholder='Confirm Password'
                                         value={user.confirmPassword}
-                                        onChange={(e) => setUser({ ...user, confirmPassword: e.target.value })}
+                                        onChange={
+                                            (e) => {
+                                                setUser({ ...user, confirmPassword: e.target.value });
+                                                setErrors({ ...errors, confirmPassword: validateFields("confirmPassword", e.target.value) });
+                                            }
+                                        }
                                     />
                                     {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
                                 </div>
-                                <div className="form-check mb-3">
-                                    <input
-                                        type="checkbox"
-                                        className="form-check-input"
-                                        id="validationFormCheck1"
-                                        checked={user.acceptedTerms}
-                                        onChange={(e) =>
-                                            setUser({ ...user, acceptedTerms: e.target.checked })
-                                        }
-                                    />
-                                    <label className="form-check-label" htmlFor="validationFormCheck1">
-                                        I accept the <a href="#">Terms and Conditions</a>
-                                    </label>
+                                <div className="inpt-wrp">
+                                    <div className="form-check">
+                                        <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            id="validationFormCheck1"
+                                            checked={user.acceptedTerms}
+
+                                            onChange={(e) => {
+                                                    setUser({ ...user, acceptedTerms: e.target.checked });
+                                                    setErrors({ ...errors, acceptedTerms: validateFields("acceptedTerms", e.target.checked) });
+                                                }}
+
+                                        />
+                                        <label className="form-check-label" htmlFor="validationFormCheck1">
+                                            I accept the <a href="#">Terms and Conditions</a>
+                                        </label>
+
+                                    </div>
                                     {errors.acceptedTerms && <p className="error">{errors.acceptedTerms}</p>}
                                 </div>
+
 
                                 <div className="inpt-wrp submit">
                                     <input type="submit" value='Register' />
@@ -183,6 +222,7 @@ function SignUp() {
                                 <div className="inpt-wrp">
                                     <h6>Already a user? <Link to="/signin">just sign in here!</Link></h6>
                                 </div>
+                                <p>{errors.all}</p>
                             </form>
                         </div>
                     </Col>

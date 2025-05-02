@@ -87,6 +87,7 @@ h3 {
         }
     }
 }
+
 .inpt-wrp {
     select {
         width: 100%;
@@ -97,5 +98,48 @@ h3 {
         font-family: "Poppins", sans-serif;
         border-bottom: 1px solid #eaeaea;
         color: #757575;
+    }
+}
+
+.strength {
+    margin-top: 5px;
+    font-weight: bold;
+    &.weak {
+        color: red;
+    }
+    &.medium {
+        color: orange;
+    }
+    &.strong {
+        color: green;
+    }
+}
+
+.indicator {
+    display: flex;
+    gap: 1rem;
+    span {
+        display: block;
+        height: 0.3rem;
+        width: 3rem;
+        background: #ccc;
+    }
+    &.weak {
+        span:nth-child(1) {
+            background: red;
+        }
+    }
+    &.medium {
+        span:nth-child(1) {
+            background: rgb(238, 197, 14);
+        }
+        span:nth-child(2) {
+            background: rgb(238, 197, 14);
+        }
+    }
+    &.strong {
+        span {
+            background: green;
+        }
     }
 }
